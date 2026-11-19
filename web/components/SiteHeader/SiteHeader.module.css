@@ -1,0 +1,266 @@
+/* Barra fija de vidrio oscuro sobre el degradado: el contenido pasa por debajo desenfocado. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(18, 10, 58, 0.6);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bar {
+    background: #160c45;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Escritorio (2 filas): logo · buscador · CTA / colonia · navegación · cuenta.
+   Celular (3 filas): logo · cuenta + CTA / buscador / colonia + navegación. Alto total = --header-h. */
+.header {
+  max-width: 1240px;
+  height: calc(var(--header-h) - 1px);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) auto;
+  grid-template-rows: 66px 46px;
+  grid-template-areas:
+    'logo search cta'
+    'location nav account';
+  align-items: center;
+  column-gap: 28px;
+}
+
+@media (max-width: 860px) {
+  .header {
+    padding: 0 14px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: 54px 52px 44px;
+    grid-template-areas:
+      'logo account cta'
+      'search search search'
+      'location nav nav';
+    column-gap: 10px;
+  }
+}
+
+.logo {
+  grid-area: logo;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+}
+
+.logo img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+@media (max-width: 480px) {
+  .logo img {
+    height: 32px;
+  }
+}
+
+.search {
+  grid-area: search;
+  min-width: 0;
+  max-width: 640px;
+  width: 100%;
+  justify-self: center;
+}
+
+/* CTA: píldora con el degradado rojo → violeta (lugar de la promoción del marketplace). */
+.cta {
+  grid-area: cta;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  background: var(--cta);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  box-shadow: var(--cta-shadow);
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover {
+    background: var(--cta-hover);
+    box-shadow: 0 14px 30px -10px rgba(255, 23, 68, 0.75);
+  }
+}
+
+.cta:active {
+  transform: scale(0.97);
+}
+
+.ctaShort {
+  display: none;
+}
+
+/* Colonia (como "Enviar a…"). */
+.location {
+  grid-area: location;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.86);
+  border-radius: var(--radius-sm);
+}
+
+.locationText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.locationLabel {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.locationValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .location:hover .locationValue {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.nav {
+  grid-area: nav;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  height: 100%;
+}
+
+.account {
+  grid-area: account;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.textLink,
+.iconLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    transform 120ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .textLink:hover,
+  .iconLink:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.textLink:active,
+.iconLink:active {
+  transform: scale(0.97);
+}
+
+/* Contador del carrito / tratos: rojo de la marca. */
+.badge {
+  position: absolute;
+  top: 0;
+  left: 22px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--red);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px #1a0f4f;
+  font-variant-numeric: tabular-nums;
+}
+
+.narrowOnly {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .wideOnly {
+    display: none;
+  }
+  .narrowOnly {
+    display: inline-flex;
+  }
+  .search {
+    max-width: none;
+  }
+  .location {
+    max-width: 120px;
+  }
+  .locationLabel {
+    display: none;
+  }
+  .nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+  .cta {
+    min-height: 38px;
+    padding: 0 16px;
+  }
+  .ctaLong {
+    display: none;
+  }
+  .ctaShort {
+    display: inline;
+  }
+}
+
+@media (max-width: 480px) {
+  .account {
+    gap: 0;
+  }
+  .textLink,
+  .iconLink {
+    padding: 0 8px;
+  }
+}

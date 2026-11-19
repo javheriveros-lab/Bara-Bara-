@@ -1,0 +1,92 @@
+.main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 16px 80px;
+}
+
+.doc {
+  padding: 32px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-sm);
+  line-height: 1.65;
+}
+
+.doc h1 {
+  font-size: 2.4rem;
+  line-height: 1.05;
+}
+
+.updated {
+  margin: 8px 0 24px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.doc h2 {
+  margin: 28px 0 8px;
+  font-size: 1.3rem;
+}
+
+.doc p,
+.doc li {
+  color: var(--text);
+  max-width: 68ch;
+}
+
+.doc ul,
+.doc ol {
+  padding-left: 22px;
+}
+
+.doc li + li {
+  margin-top: 4px;
+}
+
+.doc a {
+  color: var(--violet);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.draft {
+  margin: 0 0 20px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.toc a {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--violet-border);
+  color: var(--violet);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.toc a[aria-current='page'] {
+  background: var(--violet-soft);
+}
+
+@media (max-width: 480px) {
+  .doc {
+    padding: 20px;
+  }
+  .doc h1 {
+    font-size: 2rem;
+  }
+}

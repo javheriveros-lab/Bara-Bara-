@@ -1,0 +1,84 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--violet-border);
+  background: var(--input-bg);
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.drop:hover,
+.drop:focus-within {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px var(--violet-glow);
+}
+
+.field[data-state='done'] .drop {
+  border-style: solid;
+  border-color: var(--violet);
+}
+
+.field[data-state='error'] .drop {
+  border-color: var(--danger-border);
+}
+
+.label {
+  font-weight: 700;
+}
+
+.status {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field[data-state='done'] .status {
+  color: var(--violet);
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--violet);
+  transition: width 150ms ease;
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.hint {
+  color: var(--text-muted);
+}
+
+.error {
+  color: var(--danger);
+}

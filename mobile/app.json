@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Bara Bara",
+    "slug": "bara-bara",
+    "scheme": "barabara",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "splash": {
+      "image": "./assets/logo-splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    }
+  }
+}

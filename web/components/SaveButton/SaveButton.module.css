@@ -1,0 +1,50 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 120ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.button[data-saved] {
+  border-color: rgba(196, 181, 253, 0.6);
+  background: var(--violet-soft);
+}
+
+.button:disabled {
+  cursor: progress;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+}

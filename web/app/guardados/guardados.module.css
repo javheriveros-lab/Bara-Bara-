@@ -1,0 +1,137 @@
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item > a {
+  flex: 1;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row form {
+  display: contents;
+}
+
+.negotiate,
+.remove {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 120ms var(--ease-out),
+    background-color 160ms ease;
+}
+
+.negotiate {
+  background: var(--cta);
+  color: #fff;
+  box-shadow: var(--cta-shadow);
+}
+
+.remove {
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .remove:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+}
+
+.negotiate:active,
+.remove:active {
+  transform: scale(0.97);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--violet-soft);
+  color: #fff;
+}
+
+.emptyTitle {
+  margin: 6px 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.emptyText {
+  max-width: 38ch;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.emptyCta {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  background: var(--cta);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--cta-shadow);
+}

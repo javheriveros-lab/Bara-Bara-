@@ -1,0 +1,182 @@
+.main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 16px 88px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.header p {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--violet);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .back:hover {
+    color: #fff;
+  }
+}
+
+/* Panel del formulario: vidrio oscuro grande como el diseño. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(170deg, rgba(10, 6, 30, 0.72), rgba(40, 30, 110, 0.55));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 40px 80px -40px rgba(5, 2, 20, 0.85);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Banda "Agrega tu producto": degradado azul → rojo → violeta con el ícono de foto. */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 32px 36px;
+  border-radius: 26px;
+  background: linear-gradient(100deg, #2a0f8f 0%, #e3001b 48%, #b0006e 72%, #a100ff 100%);
+  box-shadow: 0 24px 50px -24px rgba(255, 23, 68, 0.55);
+}
+
+.hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.hero p {
+  margin: 10px 0 0;
+  max-width: 36ch;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.heroIcon {
+  flex: none;
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 22px 20px;
+  }
+  .heroIcon svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 20px 16px;
+  }
+}
+
+/* ── Mosaicos de tipo ── */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mosaico: módulo blanco como las tarjetas del feed, se eleva al pasar el cursor. */
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  animation: bb-slam-in 360ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 50ms);
+  transition:
+    transform 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out),
+    border-color 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover {
+    transform: translateY(-3px);
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.tile:active {
+  transform: scale(0.985);
+}
+
+.tilePillar {
+  align-self: flex-start;
+  margin-bottom: 4px;
+  padding: 3px 8px 2px;
+  border-radius: var(--radius-tape);
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tileTitle {
+  font-family: var(--font-stencil), var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 1.7rem;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.tileText {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* Pagar lo vencido es un CTA crítico: rayo amarillo. */
+.payCta {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--cta);
+  color: var(--ink);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--cta-shadow);
+}

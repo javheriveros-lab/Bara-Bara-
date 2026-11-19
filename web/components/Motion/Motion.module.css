@@ -1,0 +1,16 @@
+/* Mientras la sección se desliza no debe aparecer scroll horizontal; se deja margen para el brillo. */
+.stage {
+  overflow-x: clip;
+  overflow-clip-margin: 14px;
+}
+
+/* Envoltura que anima Framer Motion; la tarjeta de adentro conserva su estilo. */
+.cutout {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.cutout > * {
+  flex: 1;
+}

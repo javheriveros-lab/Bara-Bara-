@@ -1,0 +1,44 @@
+import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { ListingsModule } from './modules/listings/listings.module';
+import { ServicesModule } from './modules/services/services.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { DealsModule } from './modules/deals/deals.module';
+import { VerificationModule } from './modules/verification/verification.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { SavedModule } from './modules/saved/saved.module';
+import { SearchModule } from './modules/search/search.module';
+import { MailModule } from './modules/mail/mail.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { HealthController } from './health.controller';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../.env'] }),
+    PrismaModule,
+    MailModule,
+    AuthModule,
+    UsersModule,
+    ListingsModule,
+    ServicesModule,
+    ChatModule,
+    UploadsModule,
+    BillingModule,
+    DealsModule,
+    VerificationModule,
+    AdminModule,
+    SavedModule,
+    SearchModule,
+    ReportsModule,
+  ],
+  controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+})
+export class AppModule {}

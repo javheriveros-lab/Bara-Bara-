@@ -1,0 +1,749 @@
+/* Portada con la distribución de un marketplace: carrusel a todo lo ancho, accesos rápidos montados
+   encima, cajas de productos, categorías y franja de confianza. Todo en vidrio sobre el degradado. */
+
+.page {
+  padding-bottom: 72px;
+}
+
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+@media (max-width: 860px) {
+  .container {
+    padding: 0 12px;
+    gap: 20px;
+  }
+}
+
+/* ─────────── Carrusel principal ─────────── */
+
+.hero {
+  position: relative;
+  /* Se funde con el fondo hacia abajo, como el banner del marketplace. */
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  mask-image: linear-gradient(#000 70%, transparent);
+}
+
+.heroTrack {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.heroTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  height: 600px;
+}
+
+.slide[data-tone='violet'] {
+  background: linear-gradient(110deg, rgba(76, 29, 220, 0.9) 0%, rgba(124, 77, 255, 0.55) 55%, rgba(255, 23, 68, 0.35) 100%);
+}
+
+.slide[data-tone='magenta'] {
+  background: linear-gradient(110deg, rgba(161, 0, 255, 0.75) 0%, rgba(224, 0, 94, 0.6) 60%, rgba(255, 23, 68, 0.5) 100%);
+}
+
+.slide[data-tone='red'] {
+  background: linear-gradient(110deg, rgba(255, 23, 68, 0.75) 0%, rgba(224, 0, 94, 0.55) 50%, rgba(91, 33, 182, 0.6) 100%);
+}
+
+.slide[data-tone='indigo'] {
+  background: linear-gradient(110deg, rgba(42, 15, 143, 0.9) 0%, rgba(59, 31, 230, 0.6) 55%, rgba(161, 0, 255, 0.45) 100%);
+}
+
+.slideInner {
+  max-width: 1240px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 28px 88px 160px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.slideCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.slideTitle {
+  max-width: 18ch;
+  font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.slideText {
+  max-width: 40ch;
+  margin: 0;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.slideCta {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: #2a0f8f;
+  font-weight: 600;
+  box-shadow: 0 12px 26px -12px rgba(5, 2, 20, 0.7);
+  transition: transform 140ms var(--ease-out);
+}
+
+.slideCta:active {
+  transform: scale(0.97);
+}
+
+/* Zona visual derecha: collage fanzine con las ideas prácticas pegadas sobre el papel de abajo. */
+.slideVisual {
+  position: relative;
+  justify-self: end;
+  width: min(100%, 500px);
+  margin: 0;
+  aspect-ratio: 720 / 560;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 50px -22px rgba(5, 2, 20, 0.85),
+    0 2px 0 rgba(255, 255, 255, 0.1);
+  transform: rotate(1.2deg);
+}
+
+.slide:nth-child(even) .slideVisual {
+  transform: rotate(-1.2deg);
+}
+
+.collage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ideas: tiras de papel recortado con tinta, como notas pegadas en un fanzine. */
+.tips {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 9%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.tips li {
+  position: relative;
+  max-width: 100%;
+  padding: 4px 10px 4px 26px;
+  background: #fffaf0;
+  color: #1a0b3d;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow: 2px 2px 0 rgba(26, 11, 61, 0.18);
+  clip-path: polygon(0 4%, 3% 0, 97% 3%, 100% 0, 99% 50%, 100% 100%, 96% 96%, 2% 100%, 0 96%, 1% 50%);
+}
+
+.tips li:nth-child(1) {
+  transform: rotate(-1deg);
+}
+
+.tips li:nth-child(2) {
+  margin-left: 18px;
+  transform: rotate(0.8deg);
+}
+
+.tips li:nth-child(3) {
+  margin-left: 6px;
+  transform: rotate(-0.5deg);
+}
+
+/* Punto de plumón antes de cada idea (rojo, amarillo, violeta). */
+.tips li::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.tips li:nth-child(2)::before {
+  background: #f5c400;
+}
+
+.tips li:nth-child(3)::before {
+  background: var(--violet-bright);
+}
+
+.credit {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  max-width: 92%;
+  font-size: 0.58rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.credit a {
+  color: rgba(26, 11, 61, 0.62);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .credit a:hover {
+    color: #1a0b3d;
+    text-decoration: underline;
+  }
+}
+
+.heroArrow {
+  position: absolute;
+  top: calc(50% - 80px);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(18, 10, 58, 0.45);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 120ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .heroArrow:hover {
+    background: rgba(18, 10, 58, 0.75);
+  }
+}
+
+.heroArrow:active {
+  transform: scale(0.94);
+}
+
+.heroPrev {
+  left: max(16px, calc(50% - 620px));
+}
+
+.heroNext {
+  right: max(16px, calc(50% - 620px));
+}
+
+.dots {
+  position: absolute;
+  left: 50%;
+  bottom: 130px;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition:
+    width 220ms var(--ease-out),
+    background-color 160ms ease;
+}
+
+.dot[data-active] {
+  width: 22px;
+  background: #fff;
+}
+
+/* Celular: la leyenda arriba y el collage abajo, a todo lo ancho. */
+@media (max-width: 860px) {
+  .slide {
+    height: auto;
+    min-height: 640px;
+  }
+  .slideInner {
+    padding: 22px 16px 124px;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 18px;
+  }
+  .slideTitle {
+    font-size: 1.55rem;
+  }
+  .slideText {
+    font-size: 0.92rem;
+  }
+  .slideVisual {
+    justify-self: center;
+    width: 100%;
+    max-width: 420px;
+  }
+  .tips {
+    bottom: 11%;
+    gap: 4px;
+  }
+  .tips li {
+    padding: 3px 8px 3px 22px;
+    font-size: 0.7rem;
+  }
+  .tips li::before {
+    left: 7px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+  }
+  .credit {
+    font-size: 0.5rem;
+  }
+  .heroArrow {
+    display: none;
+  }
+  .dots {
+    bottom: 104px;
+  }
+}
+
+/* ─────────── Accesos rápidos (montados sobre el carrusel) ─────────── */
+
+.shortcuts {
+  position: relative;
+  z-index: 2;
+  margin-top: -118px;
+}
+
+.shortcutList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-height: 226px;
+  padding: 16px 14px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.shortcutTitle {
+  align-self: stretch;
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: left;
+  color: #fff;
+}
+
+.shortcutIcon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 4px 0;
+  border-radius: 50%;
+  background: var(--violet-soft);
+  color: #fff;
+}
+
+.shortcutText {
+  flex: 1;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.shortcutCta {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  border-radius: var(--radius-pill);
+  background: rgba(124, 77, 255, 0.28);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    transform 120ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shortcutCta:hover {
+    background: var(--violet-bright);
+  }
+}
+
+.shortcutCta:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 1100px) {
+  .shortcutList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Celular: fila deslizable, como en la app del marketplace. */
+@media (max-width: 640px) {
+  .shortcuts {
+    margin-top: -84px;
+  }
+  .shortcutList {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin: 0 -12px;
+    padding: 0 12px 4px;
+  }
+  .shortcutList::-webkit-scrollbar {
+    display: none;
+  }
+  .shortcut {
+    flex: 0 0 150px;
+    min-height: 210px;
+    scroll-snap-align: start;
+  }
+}
+
+/* ─────────── Cajas ─────────── */
+
+.box {
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 30px 60px -36px rgba(5, 2, 20, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .box,
+  .shortcut {
+    background: #1d1253;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .box {
+    padding: 16px 12px;
+    border-radius: 22px;
+  }
+}
+
+.boxHead {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.boxTitle {
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+}
+
+.boxLink {
+  flex: none;
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--violet);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .boxLink:hover {
+    color: #fff;
+  }
+}
+
+/* Fila horizontal de productos. */
+.rowWrap {
+  position: relative;
+}
+
+.rowTrack {
+  margin: 0;
+  padding: 2px 2px 8px;
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 4 * 18px) / 5);
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.rowTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.rowItem {
+  display: flex;
+  scroll-snap-align: start;
+}
+
+.rowItem > a {
+  flex: 1;
+}
+
+@media (max-width: 1100px) {
+  .rowTrack {
+    grid-auto-columns: calc((100% - 3 * 16px) / 4);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 860px) {
+  .rowTrack {
+    grid-auto-columns: 44%;
+    gap: 12px;
+  }
+}
+
+.rowArrow {
+  position: absolute;
+  top: calc(50% - 22px);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(24, 14, 64, 0.85);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 120ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rowArrow:hover {
+    background: var(--violet-bright);
+  }
+}
+
+.rowArrow:active {
+  transform: scale(0.94);
+}
+
+.rowPrev {
+  left: -18px;
+}
+
+.rowNext {
+  right: -18px;
+}
+
+@media (max-width: 860px), (hover: none) {
+  .rowArrow {
+    display: none;
+  }
+}
+
+/* Categorías: 4 columnas de foto + nombre. */
+.catGrid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 860px) {
+  .catGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+.cat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 84px;
+  padding: 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 120ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cat:hover {
+    background: rgba(255, 255, 255, 0.11);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+}
+
+.cat:active {
+  transform: scale(0.98);
+}
+
+.catMedia {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--violet-soft);
+}
+
+.catImage {
+  object-fit: cover;
+}
+
+.catIcon {
+  color: #fff;
+}
+
+.catLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .cat {
+    gap: 10px;
+    min-height: 64px;
+  }
+  .catMedia {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+  }
+  .catLabel {
+    font-size: 0.85rem;
+  }
+}
+
+/* Franja de confianza. */
+.trust {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 12px;
+  padding: 36px 24px;
+  border-radius: var(--radius-lg);
+  background: rgba(10, 6, 30, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.trustItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.trustItem + .trustItem {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trustIcon {
+  color: var(--violet);
+}
+
+.trustTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.trustText {
+  max-width: 34ch;
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.trustLink {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--violet);
+}
+
+@media (max-width: 860px) {
+  .trust {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 28px 16px;
+  }
+  .trustItem + .trustItem {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroTrack,
+  .rowTrack {
+    scroll-behavior: auto;
+  }
+}

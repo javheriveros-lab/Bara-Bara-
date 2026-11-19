@@ -1,0 +1,20 @@
+# MongoDB local como replica set de un nodo: Prisma lo necesita para transacciones y escrituras anidadas.
+services:
+  mongo:
+    image: mongo:7
+    container_name: bara_mongo
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - bara_mongo:/data/db
+    healthcheck:
+      # Inicializa el replica set la primera vez y luego solo verifica su estado.
+      test: >
+        mongosh --quiet --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+volumes:
+  bara_mongo:

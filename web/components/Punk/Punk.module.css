@@ -1,0 +1,134 @@
+/* Estados con actitud urbana, en clave limpia: módulo blanco, trama de impresión y sello amarillo. */
+
+/* ─────────── Cartel urbano: sin señal / sin resultados ─────────── */
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 44px 24px 36px;
+  text-align: center;
+  border-radius: var(--radius-md);
+  background: var(--halftone), var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-sm);
+  animation: bb-slam-in 360ms var(--ease-out) both;
+}
+
+/* Marcas de esténcil en esquinas opuestas, como en las tarjetas. */
+.panel::before,
+.panel::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: solid var(--stencil);
+}
+
+.panel::before {
+  top: 12px;
+  left: 12px;
+  border-width: 2px 0 0 2px;
+}
+
+.panel::after {
+  bottom: 12px;
+  right: 12px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Rótulo: cinta violeta con corte asimétrico. */
+.tag {
+  padding: 4px 12px 3px;
+  border-radius: var(--radius-tape);
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.signalIcon {
+  fill: none;
+  stroke: var(--violet);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  animation: bb-flicker-violet 3s linear infinite;
+}
+
+.signalIcon circle {
+  fill: var(--violet);
+  stroke: none;
+}
+
+.signalSlash {
+  stroke: var(--text-muted);
+  stroke-width: 2;
+}
+
+@keyframes bb-flicker-violet {
+  0%, 40%, 44%, 100% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.35;
+  }
+}
+
+.panelText {
+  max-width: 34ch;
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.panelMeta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* CTA crítico: sello amarillo con tinta. */
+.stampButton {
+  display: inline-block;
+  padding: 11px 26px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--cta);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 1.08rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--cta-shadow);
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .stampButton:hover {
+    background: var(--cta-hover);
+  }
+}
+
+.stampButton:active {
+  transform: scale(0.97);
+}
+
+.stampButton:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}

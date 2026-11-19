@@ -1,0 +1,26 @@
+{
+  "source": "DESIGN.md",
+  "background": "body::before fixed layer: radial-gradient(70% 80% at 0% 0%, rgba(59,31,230,.95), transparent 62%), radial-gradient(60% 70% at 100% 82%, rgba(255,23,68,.95), transparent 60%), radial-gradient(45% 45% at 88% 0%, rgba(176,18,79,.75), transparent 70%), radial-gradient(50% 50% at 55% 55%, rgba(110,30,170,.55), transparent 70%), linear-gradient(155deg, #24107a, #120a3a 48%, #2a0738)",
+  "cta": "linear-gradient(100deg, #ff1744 0%, #e0005e 45%, #a100ff 100%)",
+  "publish-band": "linear-gradient(100deg, #2a0f8f 0%, #e3001b 48%, #b0006e 72%, #a100ff 100%)",
+  "shadows": {
+    "card": "inset 0 1px 0 rgba(255,255,255,.06), 0 10px 24px -14px rgba(5,2,20,.7)",
+    "card-hover": "inset 0 1px 0 rgba(255,255,255,.08), 0 22px 44px -18px rgba(5,2,20,.8)",
+    "panel": "inset 0 1px 0 rgba(255,255,255,.12), 0 40px 80px -40px rgba(5,2,20,.8)",
+    "cta": "0 10px 24px -10px rgba(255,23,68,.6)"
+  },
+  "glass": {
+    "header": "rgba(18,10,58,.55) + blur(22px) saturate(160%)",
+    "panel": "linear-gradient(160deg, rgba(255,255,255,.11), rgba(255,255,255,.05)) + blur(18px) saturate(140%)",
+    "reduced-transparency": "solid #160c45 / #1d1253"
+  },
+  "motion": {
+    "ease-out": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "hover-lift": "translateY(-4px) 220ms, fine pointer only",
+    "press": "scale(.97-.985) 120-160ms",
+    "spring": { "type": "spring", "bounce": 0, "duration": 0.4 }
+  },
+  "assets": {
+    "logo": "web/public/brand/logo-horizontal-white.webp (white lettering, red sphere base), logo-splash-white-480/800.webp"
+  }
+}

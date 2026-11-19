@@ -1,0 +1,450 @@
+/* "Esfera y trueno": loader de la app. Todo es transform/opacity (compositor, 60 fps).
+   Ciclo de 2.4 s en bucle mientras esté montado:
+     0–7%   el rayo cae desde el borde superior del contenedor (0.17 s)
+     7.4–11.5% destello de impacto (0.1 s)
+     7–40%  recarga: la esfera brilla, ola de luz por su borde, pico del halo violeta
+     40–100% el halo respira hasta el siguiente trueno
+   Escala con su contenedor (container queries): de pantalla completa a tarjeta.
+   Esfera medida sobre el logo: centro 49.5% × 31.4%, diámetro ≈ 25% del ancho, cima al 11.5%. */
+
+.stage {
+  --loop: 2.4s;
+  --start: 0.35s;
+  --flash-peak: 0.85;
+  --bolt-w: 6px;
+  --bolt-core: 2px;
+  /* Ancho del logo: cabe a lo ancho y a lo alto del contenedor. */
+  --logo-w: min(70cqw, 112cqh, 420px);
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: transparent;
+  container-type: size;
+}
+
+/* Carga de página: ocupa la pantalla bajo el header. */
+.stage[data-variant='screen'] {
+  width: 100%;
+  height: calc(100dvh - var(--header-h));
+  min-height: 320px;
+}
+
+/* Proceso en curso (publicar, enviar documentos): cubre todo. Aparece tras 180 ms para que las
+   respuestas rápidas no hagan parpadear la pantalla. */
+.stage[data-variant='overlay'] {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  width: 100vw;
+  height: 100dvh;
+  opacity: 0;
+  animation: overlay-in 160ms ease-out 180ms forwards;
+}
+
+@keyframes overlay-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Dentro de una tarjeta: área de la foto, trazos más finos y destello más suave. */
+.stage[data-variant='card'] {
+  --logo-w: min(74cqw, 112cqh);
+  --flash-peak: 0.5;
+  --bolt-w: 3.5px;
+  --bolt-core: 1.3px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-handstyle), cursive;
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.logoWrap {
+  position: relative;
+  width: var(--logo-w);
+  animation: land 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* El logo aparece y se asienta. */
+@keyframes land {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.logo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ─────────── Halo violeta: pico al recargar y respiración ─────────── */
+
+.glow {
+  position: absolute;
+  left: 49.5%;
+  top: 31.4%;
+  width: 60%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(187, 134, 252, 0.8) 0%, rgba(187, 134, 252, 0.34) 42%, transparent 70%);
+  filter: blur(calc(var(--logo-w) * 0.035));
+  animation: glow var(--loop) linear var(--start) infinite both;
+}
+
+@keyframes glow {
+  0%,
+  7% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.32);
+  }
+  22% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+  40% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  60% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+  80% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  100% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+/* ─────────── El trueno ─────────── */
+
+/* Del borde superior del contenedor a la cima de la esfera. El logo (alto ≈ 0.6 × ancho) está
+   centrado, así que la cima queda a 50cqh − 0.2316 × ancho del logo. Cae ya formado. */
+.bolt {
+  position: absolute;
+  left: 49.5%;
+  bottom: 88.5%;
+  width: 24%;
+  height: calc(50cqh - var(--logo-w) * 0.2316 + 1px);
+  overflow: visible;
+  filter: drop-shadow(0 0 5px rgba(253, 216, 53, 0.95)) drop-shadow(0 0 14px rgba(253, 216, 53, 0.5));
+  animation: fall var(--loop) linear var(--start) infinite both;
+}
+
+@keyframes fall {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  16%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+
+.boltOuter,
+.boltCore {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.boltOuter {
+  stroke: var(--bolt);
+  stroke-width: var(--bolt-w);
+}
+
+.boltCore {
+  stroke: #fffbe6;
+  stroke-width: var(--bolt-core);
+}
+
+.branch .boltOuter {
+  stroke-width: calc(var(--bolt-w) * 0.6);
+}
+
+.branch .boltCore {
+  stroke-width: calc(var(--bolt-core) * 0.6);
+}
+
+/* Vibración: dos formas del rayo que se alternan muy rápido. */
+.shapeA {
+  animation: shape-a var(--loop) linear var(--start) infinite both;
+}
+
+.shapeB {
+  animation: shape-b var(--loop) linear var(--start) infinite both;
+}
+
+@keyframes shape-a {
+  0%,
+  7.9% {
+    opacity: 1;
+  }
+  8%,
+  9.9% {
+    opacity: 0;
+  }
+  10%,
+  11.9% {
+    opacity: 1;
+  }
+  12%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes shape-b {
+  0%,
+  7.9% {
+    opacity: 0;
+  }
+  8%,
+  9.9% {
+    opacity: 1;
+  }
+  10%,
+  11.9% {
+    opacity: 0;
+  }
+  12%,
+  14% {
+    opacity: 1;
+  }
+  15%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Ramificaciones: aparecen un instante después del tronco y parpadean. */
+.branch {
+  animation: branch var(--loop) linear var(--start) infinite both;
+}
+
+@keyframes branch {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0.35;
+  }
+  11% {
+    opacity: 1;
+  }
+  14%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Impacto: destello amarillo en todo el contenedor (~0.1 s). */
+.flash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(255, 250, 220, 0.9) 0%,
+    rgba(253, 216, 53, 0.6) 30%,
+    rgba(253, 216, 53, 0.22) 75%
+  );
+  opacity: 0;
+  animation: flash var(--loop) linear var(--start) infinite both;
+}
+
+@keyframes flash {
+  0%,
+  6.8% {
+    opacity: 0;
+  }
+  7.4% {
+    opacity: var(--flash-peak);
+  }
+  11.5%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ─────────── Recarga de la esfera ─────────── */
+
+.charge {
+  position: absolute;
+  left: 49.5%;
+  top: 31.4%;
+  width: 25%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 40%, rgba(237, 233, 254, 0.75) 0%, rgba(139, 92, 246, 0.45) 50%, transparent 72%);
+  animation: charge var(--loop) linear var(--start) infinite both;
+}
+
+@keyframes charge {
+  0%,
+  7% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  10% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  40%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Ola de luz que recorre el borde de la esfera una vuelta rápida. */
+.ring {
+  position: absolute;
+  left: 49.5%;
+  top: 31.4%;
+  width: 29%;
+  aspect-ratio: 1;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px rgba(187, 134, 252, 0.95)) drop-shadow(0 0 10px rgba(187, 134, 252, 0.6));
+  animation: ring var(--loop) linear var(--start) infinite both;
+}
+
+.ring circle {
+  fill: none;
+  stroke: #f3e8ff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 24 76;
+}
+
+@keyframes ring {
+  0%,
+  7.5% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-90deg);
+  }
+  9% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(270deg);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(270deg);
+  }
+}
+
+/* ─────────── Tarjetas fantasma (grid del feed) ─────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+/* Misma silueta que la tarjeta real (vidrio, radio 20px, foto cuadrada): sin salto al llegar. */
+.ghostCard {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.ghostBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.ghostLine {
+  height: 14px;
+  width: 70%;
+  border-radius: 4px;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.14) 48%, transparent 66%),
+    rgba(255, 255, 255, 0.06);
+  background-size: 220% 100%;
+  animation: bb-shimmer 1.4s linear infinite;
+}
+
+.ghostLine[data-w='40'] {
+  width: 40%;
+}
+
+.ghostLine[data-w='90'] {
+  width: 90%;
+}
+
+.ghostLine[data-thin] {
+  height: 9px;
+  margin-top: 8px;
+}
+
+/* Reducir movimiento: sin rayo, destello ni ola; solo el logo con su halo. */
+@media (prefers-reduced-motion: reduce) {
+  .bolt,
+  .flash,
+  .charge,
+  .ring {
+    display: none;
+  }
+  .stage[data-variant='overlay'] {
+    opacity: 1;
+    animation: none;
+  }
+}

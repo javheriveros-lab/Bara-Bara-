@@ -1,0 +1,209 @@
+:root {
+  /* Tipografía: una sola familia (Poppins). Los alias mantienen funcionando los módulos existentes. */
+  --font-display: var(--font-body);
+  --font-stencil: var(--font-body);
+  --font-handstyle: var(--font-body);
+
+  /* Fondo: morado profundo que se difumina en rojo (ver body::before). Color sólido de respaldo. */
+  --bg: #120a3a;
+
+  /* Superficies de vidrio sobre el degradado */
+  --bg-elevated: rgba(255, 255, 255, 0.08);
+  --surface: rgba(255, 255, 255, 0.07);
+  --surface-hover: rgba(255, 255, 255, 0.11);
+  --surface-muted: rgba(255, 255, 255, 0.06);
+  --panel: rgba(255, 255, 255, 0.08);
+  --hairline: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.26);
+
+  /* Texto */
+  --ink: #ffffff;
+  --text: #f5f3ff;
+  --text-muted: rgba(237, 233, 254, 0.74);
+  --text-faint: rgba(237, 233, 254, 0.52);
+
+  /* Violeta eléctrico: búsqueda, estados activos, enlaces (el tono claro es el seguro para texto) */
+  --violet: #c4b5fd;
+  --violet-bright: #7c4dff;
+  --violet-neon: #bb86fc;
+  --violet-soft: rgba(124, 77, 255, 0.2);
+  --violet-border: rgba(255, 255, 255, 0.14);
+  --violet-glow: rgba(124, 77, 255, 0.18);
+  --violet-glow-strong: rgba(124, 77, 255, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-hover: rgba(196, 181, 253, 0.6);
+
+  /* Rojo de la marca y la llamada a la acción: degradado rojo → violeta del diseño */
+  --red: #ff1744;
+  --cta: linear-gradient(100deg, #ff1744 0%, #e0005e 45%, #a100ff 100%);
+  --cta-hover: linear-gradient(100deg, #ff3d5f 0%, #f0107a 45%, #b52bff 100%);
+  --cta-shadow: 0 10px 24px -10px rgba(255, 23, 68, 0.6);
+  /* Rayo amarillo: solo el logo y la estrella de calificación */
+  --bolt: #fdd835;
+  --bolt-deep: #fdd835;
+
+  /* Elevación: sombras profundas, sin halos de colores */
+  --shadow-sm: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 24px -14px rgba(5, 2, 20, 0.7);
+  --shadow-md: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 22px 44px -18px rgba(5, 2, 20, 0.8);
+  --shadow-lg: 0 30px 60px -20px rgba(5, 2, 20, 0.85);
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+
+  /* Trama tenue para tarjetas sin foto */
+  --stencil: #c4b5fd;
+  --halftone: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1.4px) 0 0 / 8px 8px;
+  --marker: linear-gradient(transparent 60%, rgba(255, 23, 68, 0.6) 60%);
+
+  /* Movimiento (Emil Kowalski / Apple): ease-out fuerte para UI, ease-in-out para desplazamientos */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-snap: var(--ease-out);
+
+  /* Formularios: campos claros translúcidos como en el diseño */
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.18);
+  --danger: #ff8a9a;
+  --danger-border: rgba(255, 138, 154, 0.45);
+  --danger-bg: rgba(255, 23, 68, 0.14);
+  --success: #6ee7b7;
+
+  /* Forma: tarjetas 20px, panel 32px, controles 12px, búsqueda y botones en píldora */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+  --radius-tape: 999px;
+
+  /* Header de tienda (2 filas). El chat calcula su alto con esto. */
+  --header-h: 113px;
+
+  color-scheme: dark;
+}
+
+@media (max-width: 860px) {
+  :root {
+    --header-h: 151px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Degradado de fondo en una capa fija propia: el navegador lo compone una vez y no lo
+   vuelve a pintar al hacer scroll (más fluido en celulares que background-attachment: fixed). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 80% at 0% 0%, rgba(59, 31, 230, 0.95) 0%, rgba(59, 31, 230, 0) 62%),
+    radial-gradient(60% 70% at 100% 82%, rgba(255, 23, 68, 0.95) 0%, rgba(255, 23, 68, 0) 60%),
+    radial-gradient(45% 45% at 88% 0%, rgba(176, 18, 79, 0.75) 0%, rgba(176, 18, 79, 0) 70%),
+    radial-gradient(50% 50% at 55% 55%, rgba(110, 30, 170, 0.55) 0%, rgba(110, 30, 170, 0) 70%),
+    linear-gradient(155deg, #24107a 0%, #120a3a 48%, #2a0738 100%);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(124, 77, 255, 0.55);
+  color: #fff;
+}
+
+html {
+  scrollbar-color: rgba(255, 255, 255, 0.25) #120a3a;
+}
+
+/* ─────────── Movimiento compartido ─────────── */
+
+@keyframes bb-slam-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bb-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Indicador de proceso: late en opacidad. */
+@keyframes bb-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Barrido de brillo para esqueletos. */
+@keyframes bb-shimmer {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

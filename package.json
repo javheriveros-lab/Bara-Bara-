@@ -1,0 +1,19 @@
+{
+  "name": "bara-bara",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter backend --filter web dev",
+    "dev:backend": "pnpm --filter backend start:dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:mobile": "pnpm --filter mobile start",
+    "build": "pnpm -r build",
+    "typecheck": "node scripts/check-moderation-sync.js && pnpm -r typecheck",
+    "db:up": "docker compose up -d",
+    "db:push": "pnpm --filter backend prisma:push",
+    "db:studio": "pnpm --filter backend prisma:studio",
+    "db:seed": "pnpm --filter backend prisma:seed",
+    "db:seed:clean": "pnpm --filter backend prisma:seed:clean",
+    "check:moderation": "node scripts/check-moderation-sync.js"
+  }
+}

@@ -1,0 +1,14 @@
+.center {
+  min-height: calc(100dvh - 90px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px 64px;
+}
+
+@media (min-height: 760px) {
+  .center {
+    align-items: center;
+    padding-top: 0;
+  }
+}

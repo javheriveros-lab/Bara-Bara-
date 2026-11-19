@@ -1,0 +1,492 @@
+// Bara Bara — esquema base (MongoDB)
+// Docs: https://pris.ly/d/prisma-schema
+//
+// Notas MongoDB:
+//  - Sin migraciones: los índices se aplican con `prisma db push`.
+//  - Transacciones y escrituras anidadas requieren replica set (Atlas lo trae por defecto).
+//  - El conector no soporta Decimal: los montos son Float (MXN, máx. 2 decimales validado en DTOs).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+/// INE = frente de la credencial.
+enum VerificationDocType {
+  INE
+  INE_BACK
+  PROOF_OF_ADDRESS
+}
+
+enum ListingType {
+  SALE
+  RENT
+  BARTER
+}
+
+enum ListingStatus {
+  ACTIVE
+  RESERVED
+  /// Vendido, rentado o intercambiado (lo marca el dueño o un trato confirmado).
+  CLOSED
+  /// El dueño la ocultó temporalmente.
+  PAUSED
+  /// Borrada por el dueño o quitada por moderación (borrado lógico: conserva chats y tratos).
+  REMOVED
+}
+
+enum ItemCondition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+}
+
+enum RentalPeriod {
+  HOUR
+  DAY
+  WEEK
+}
+
+enum ServiceCategory {
+  PLUMBING
+  ELECTRICAL
+  BEAUTY
+  COOKING
+  CLASSES
+  OTHER
+}
+
+enum PricingModel {
+  FIXED
+  HOURLY
+  QUOTE
+}
+
+enum ServiceStatus {
+  ACTIVE
+  PAUSED
+  CLOSED
+  /// Borrado por el prestador o quitado por moderación (borrado lógico).
+  REMOVED
+}
+
+/// Tipo de trato: el de la publicación (SALE/RENT/BARTER) o SERVICE para Chamba de Barrio.
+enum DealKind {
+  SALE
+  RENT
+  BARTER
+  SERVICE
+}
+
+enum DealStatus {
+  PROPOSED
+  CONFIRMED
+  CANCELLED
+}
+
+/// NONE: trueque (0%). PENDING: el vendedor la debe. PAID: conciliada.
+enum CommissionStatus {
+  NONE
+  PENDING
+  PAID
+}
+
+enum CommissionPaymentStatus {
+  PENDING
+  PROOF_SUBMITTED
+  PAID
+  REJECTED
+  CANCELLED
+}
+
+enum MessageKind {
+  TEXT
+  DEAL
+}
+
+// ───────────────────────── Usuarios y verificación ─────────────────────────
+
+model User {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  email        String  @unique
+  // Único solo cuando existe: MongoDB trata los ausentes como null repetidos,
+  // así que no se marca @unique hasta definir un índice parcial.
+  phone        String?
+  passwordHash String
+  displayName  String
+  avatarUrl    String?
+  bio          String?
+  neighborhood String?
+  latitude     Float?
+  longitude    Float?
+  role         Role    @default(USER)
+
+  // Verificación (INE + comprobante de domicilio)
+  verificationStatus   VerificationStatus @default(UNVERIFIED)
+  ineVerified          Boolean            @default(false)
+  addressProofVerified Boolean            @default(false)
+  verifiedAt           DateTime?
+
+  // Reputación (se recalcula a partir de Review), 0–5
+  reputationScore Float @default(0)
+  reviewCount     Int   @default(0)
+
+  // Comisiones. Opcionales: las cuentas creadas antes no tienen estos campos en MongoDB.
+  /// Desde cuándo tiene comisiones vencidas: sus publicaciones se ocultan y no puede publicar.
+  billingHoldSince DateTime?
+  /// Insignia "Vecino Confiable" (paga a tiempo). Se recalcula en BillingService.
+  reliablePayer    Boolean?
+
+  // Consentimientos (LFPDPPP). Opcionales: las cuentas anteriores no los tienen.
+  /// Aceptó términos y aviso de privacidad al registrarse (versión en termsVersion).
+  acceptedTermsAt  DateTime?
+  termsVersion     String?
+  /// Consentimiento expreso para tratar datos de identificación (INE y comprobante de domicilio).
+  kycConsentAt     DateTime?
+
+  /// Cuenta bloqueada por moderación: no puede entrar y sus publicaciones se ocultan.
+  suspendedAt      DateTime?
+  suspendedReason  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  verificationDocuments VerificationDocument[]
+  listings              Listing[]
+  services              Service[]
+  reviewsWritten        Review[]                  @relation("ReviewAuthor")
+  reviewsReceived       Review[]                  @relation("ReviewTarget")
+  conversations         ConversationParticipant[]
+  messages              Message[]
+  dealsAsSeller         Deal[]                    @relation("DealSeller")
+  dealsAsBuyer          Deal[]                    @relation("DealBuyer")
+  commissionPayments    CommissionPayment[]
+  savedItems            SavedItem[]
+  passwordResets        PasswordReset[]
+  reportsMade           Report[]                  @relation("ReportReporter")
+  reportsReceived       Report[]                  @relation("ReportTarget")
+
+  @@index([neighborhood])
+}
+
+/// Evidencia de verificación. Archivo en almacenamiento privado; nunca se expone en la API pública.
+/// fileUrl guarda la ruta del archivo privado en ImageKit ("/bara-bara/private/kyc/…"), no una URL pública.
+model VerificationDocument {
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String              @db.ObjectId
+  type         VerificationDocType
+  fileUrl      String
+  status       VerificationStatus  @default(PENDING)
+  reviewerNote String?
+  reviewedAt   DateTime?
+  createdAt    DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+// ───────────────────────── Venta, Renta y Trueque ─────────────────────────
+
+/// Los campos por tipo se validan en los DTOs de NestJS:
+///  SALE   → price
+///  RENT   → rentalRate + rentalPeriod + deposit
+///  BARTER → barterWants (acceptsServices opcional)
+model Listing {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId      String        @db.ObjectId
+  type         ListingType
+  status       ListingStatus @default(ACTIVE)
+  title        String
+  description  String
+  category     String
+  condition    ItemCondition @default(GOOD)
+  images       String[]
+  neighborhood String
+
+  // Venta
+  price Float?
+
+  // Renta
+  rentalRate   Float?
+  rentalPeriod RentalPeriod?
+  deposit      Float?
+
+  // Trueque (necesidades cruzadas)
+  barterWants     String[]
+  acceptsServices Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  reviews       Review[]
+  conversations Conversation[]
+  deals         Deal[]
+  savedBy       SavedItem[]
+  reports       Report[]
+
+  @@index([type, status, neighborhood])
+  @@index([ownerId])
+}
+
+// ───────────────────────── Chamba de Barrio ─────────────────────────
+
+model Service {
+  id                   String          @id @default(auto()) @map("_id") @db.ObjectId
+  providerId           String          @db.ObjectId
+  category             ServiceCategory
+  status               ServiceStatus   @default(ACTIVE)
+  title                String
+  description          String
+  pricingModel         PricingModel
+  basePrice            Float?
+  coverageRadiusKm     Int             @default(3)
+  /// Ej: { "mon": ["09:00-14:00"], "sat": ["10:00-18:00"] }
+  availability         Json?
+  requiresVerification Boolean         @default(true)
+  neighborhood         String
+  images               String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  provider      User           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  reviews       Review[]
+  conversations Conversation[]
+  deals         Deal[]
+  savedBy       SavedItem[]
+  reports       Report[]
+
+  @@index([category, status])
+  @@index([providerId])
+}
+
+// ───────────────────────── Reputación ─────────────────────────
+
+model Review {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId     String   @db.ObjectId
+  targetUserId String   @db.ObjectId
+  listingId    String?  @db.ObjectId
+  serviceId    String?  @db.ObjectId
+  rating       Int // 1–5, validado en DTO
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  author     User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetUser User     @relation("ReviewTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  listing    Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  service    Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([targetUserId])
+}
+
+// ───────────────────────── Chat de negociación ─────────────────────────
+
+/// Conversación entre vecinos sobre un Listing o un Service.
+/// El cliente solo recibe userIds y perfiles públicos; email/teléfono nunca viajan por el socket.
+model Conversation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  listingId String?  @db.ObjectId
+  serviceId String?  @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listing      Listing?                  @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  service      Service?                  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  participants ConversationParticipant[]
+  messages     Message[]
+  deals        Deal[]
+
+  @@index([listingId])
+  @@index([serviceId])
+}
+
+/// MongoDB no admite claves primarias compuestas: _id propio + único (conversationId, userId).
+model ConversationParticipant {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String    @db.ObjectId
+  userId         String    @db.ObjectId
+  lastReadAt     DateTime?
+  joinedAt       DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String       @db.ObjectId
+  senderId       String       @db.ObjectId
+  body           String
+  /// null (mensajes anteriores) = TEXT. DEAL: aviso del sistema sobre un trato.
+  kind           MessageKind?
+  dealId         String?      @db.ObjectId
+  createdAt      DateTime     @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+// ───────────────────────── Tratos y comisiones ─────────────────────────
+
+/// Trato cerrado en el chat. El vendedor/prestador propone el precio final y el comprador confirma.
+/// La comisión (5%, 0% en trueque) se descuenta al vendedor: el comprador paga el precio publicado.
+/// En Renta, amount es la tarifa acordada; la fianza (rentalDeposit) nunca paga comisión.
+model Deal {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId   String           @db.ObjectId
+  listingId        String?          @db.ObjectId
+  serviceId        String?          @db.ObjectId
+  sellerId         String           @db.ObjectId
+  buyerId          String           @db.ObjectId
+  kind             DealKind
+  amount           Float
+  rentalDeposit    Float?
+  commissionRate   Float
+  commission       Float
+  status           DealStatus       @default(PROPOSED)
+  commissionStatus CommissionStatus @default(NONE)
+  proposedAt       DateTime         @default(now())
+  confirmedAt      DateTime?
+  cancelledAt      DateTime?
+  /// Fecha límite para pagar la comisión (confirmedAt + 7 días).
+  dueAt            DateTime?
+  paidAt           DateTime?
+  /// Referencia de pago a la que está asignado ahora mismo.
+  paymentId        String?          @db.ObjectId
+
+  conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  listing      Listing?           @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  service      Service?           @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  seller       User               @relation("DealSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  buyer        User               @relation("DealBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  payment      CommissionPayment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, proposedAt])
+  @@index([sellerId, commissionStatus, dueAt])
+}
+
+/// Referencia SPEI única para pagar comisiones pendientes. Se concilia por webhook del banco/proveedor
+/// (referencia + monto) o con el comprobante que revisa un admin.
+model CommissionPayment {
+  id               String                  @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String                  @db.ObjectId
+  /// "BB-XXXXXXXX": va en el concepto/referencia de la transferencia.
+  reference        String                  @unique
+  amount           Float
+  status           CommissionPaymentStatus @default(PENDING)
+  dealIds          String[]                @db.ObjectId
+  /// Comprobante: ruta del archivo privado en ImageKit.
+  proofFile        String?
+  proofSubmittedAt DateTime?
+  /// Id de la transferencia que reportó el webhook (idempotencia).
+  providerTxId     String?
+  reviewedById     String?                 @db.ObjectId
+  reviewerNote     String?
+  paidAt           DateTime?
+  expiresAt        DateTime
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deals Deal[]
+
+  @@index([userId, status])
+  @@index([status])
+  @@index([providerTxId])
+}
+
+/// "Guardados" de un vecino (el carrito de Bara Bara): objetos o servicios que quiere negociar después.
+/// itemKey = "L:<listingId>" o "S:<serviceId>"; con él la combinación usuario+artículo es única
+/// (un índice único sobre listingId/serviceId nulos chocaría en MongoDB).
+model SavedItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  itemKey   String
+  listingId String?  @db.ObjectId
+  serviceId String?  @db.ObjectId
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemKey])
+  @@index([userId, createdAt])
+}
+
+/// Enlace de "olvidé mi contraseña". Solo se guarda el hash SHA-256 del token; un solo uso, expira en 30 min.
+model PasswordReset {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum ReportReason {
+  PROHIBITED
+  SCAM
+  OFFENSIVE
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  ACTIONED
+  DISMISSED
+}
+
+/// Reporte de un vecino sobre una publicación, un servicio o un usuario. Lo resuelve un ADMIN.
+model Report {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId     String       @db.ObjectId
+  listingId      String?      @db.ObjectId
+  serviceId      String?      @db.ObjectId
+  reportedUserId String       @db.ObjectId
+  reason         ReportReason
+  note           String?
+  status         ReportStatus @default(OPEN)
+  resolvedById   String?      @db.ObjectId
+  resolvedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  reporter     User     @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser User     @relation("ReportTarget", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  listing      Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  service      Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([reporterId])
+}
